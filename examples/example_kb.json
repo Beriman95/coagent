@@ -1,0 +1,58 @@
+[
+    {
+        "id": "kb001",
+        "title": "How to Check Server Uptime",
+        "category": "System Administration",
+        "content": "To check server uptime, use the `uptime` command in Linux. This shows how long the system has been running, number of users, and load averages. Example output: `14:23:45 up 10 days, 3:14, 2 users, load average: 0.15, 0.20, 0.18`",
+        "tags": [
+            "linux",
+            "uptime",
+            "monitoring"
+        ]
+    },
+    {
+        "id": "kb002",
+        "title": "Understanding Load Average",
+        "category": "Performance",
+        "content": "Load average represents the average system load over 1, 5, and 15 minutes. Values below the number of CPU cores indicate good performance. For a 4-core system, load average of 3.0 is acceptable, while 6.0 indicates system strain.",
+        "tags": [
+            "performance",
+            "monitoring",
+            "load"
+        ]
+    },
+    {
+        "id": "kb003",
+        "title": "SSH Key-Based Authentication",
+        "category": "Security",
+        "content": "SSH key authentication is more secure than passwords. Generate keys with `ssh-keygen -t rsa -b 4096`. Copy public key to server with `ssh-copy-id user@server`. Disable password authentication in `/etc/ssh/sshd_config` by setting `PasswordAuthentication no`.",
+        "tags": [
+            "ssh",
+            "security",
+            "authentication"
+        ]
+    },
+    {
+        "id": "kb004",
+        "title": "MySQL Slow Query Analysis",
+        "category": "Database",
+        "content": "Enable slow query log in MySQL to identify performance issues. Set `slow_query_log = 1` and `long_query_time = 2` in my.cnf. Analyze logs with `mysqldumpslow` to find queries taking over 2 seconds. Optimize with proper indexes and query restructuring.",
+        "tags": [
+            "mysql",
+            "performance",
+            "database"
+        ]
+    },
+    {
+        "id": "kb005",
+        "title": "Apache vs Nginx Performance",
+        "category": "Web Servers",
+        "content": "Apache uses process-based model, better for dynamic content. Nginx uses event-driven model, excels at static content and reverse proxy. For high-traffic sites, use Nginx as reverse proxy with Apache backend for best of both worlds.",
+        "tags": [
+            "apache",
+            "nginx",
+            "webserver",
+            "performance"
+        ]
+    }
+]

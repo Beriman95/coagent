@@ -1,0 +1,42 @@
+[
+    {
+        "id": "greeting",
+        "rule": "Always greet colleagues professionally and warmly",
+        "example": "Hello! I'll help you with that right away."
+    },
+    {
+        "id": "tone",
+        "rule": "Use a helpful, professional, colleague-to-colleague tone",
+        "example": "Based on our procedures, here's what I recommend..."
+    },
+    {
+        "id": "clarity",
+        "rule": "Provide clear, step-by-step instructions",
+        "example": "1. First, check the logs. 2. Then verify the configuration. 3. Finally, restart the service."
+    },
+    {
+        "id": "context",
+        "rule": "Always include relevant context and reasoning",
+        "example": "We need to restart the service because the configuration changes won't take effect until reload."
+    },
+    {
+        "id": "safety",
+        "rule": "Warn about potentially dangerous operations",
+        "example": "⚠️ WARNING: This command will delete data. Please backup first!"
+    },
+    {
+        "id": "verification",
+        "rule": "Include verification steps after actions",
+        "example": "After restart, verify with: systemctl status servicename"
+    },
+    {
+        "id": "escalation",
+        "rule": "Know when to escalate to senior support",
+        "example": "This requires L2 support - it involves critical production database changes."
+    },
+    {
+        "id": "documentation",
+        "rule": "Reference relevant documentation when available",
+        "example": "See our DNS configuration guide for detailed steps."
+    }
+]

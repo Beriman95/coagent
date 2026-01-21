@@ -1,0 +1,104 @@
+[
+    {
+        "id": "server_restart",
+        "title": "Server Restart Procedure",
+        "category": "Infrastructure",
+        "keywords": [
+            "restart",
+            "reboot",
+            "server",
+            "down"
+        ],
+        "content": "**Standard Server Restart Procedure**\n\n1. Check server status and running services\n2. Notify relevant stakeholders about planned restart\n3. Create backup of critical configurations\n4. Gracefully stop running services\n5. Initiate server restart\n6. Monitor boot process\n7. Verify all services started correctly\n8. Run health checks\n9. Confirm with stakeholders\n\n**Important Notes:**\n- Always check for running processes before restart\n- Document restart reason and time\n- Keep monitoring enabled during process"
+    },
+    {
+        "id": "password_reset",
+        "title": "User Password Reset",
+        "category": "Account Management",
+        "keywords": [
+            "password",
+            "reset",
+            "account",
+            "login"
+        ],
+        "content": "**Password Reset Process**\n\n1. Verify user identity (email, phone, security questions)\n2. Access user management panel\n3. Navigate to user account\n4. Click 'Reset Password' button\n5. Generate temporary password or send reset link\n6. Communicate credentials securely to user\n7. Ask user to change password on first login\n8. Log the password reset action\n\n**Security Requirements:**\n- Never send passwords via unencrypted channels\n- Require password change on first login\n- Ensure password meets complexity requirements"
+    },
+    {
+        "id": "ssl_renewal",
+        "title": "SSL Certificate Renewal",
+        "category": "Security",
+        "keywords": [
+            "ssl",
+            "certificate",
+            "https",
+            "renewal"
+        ],
+        "content": "**SSL Certificate Renewal Procedure**\n\n1. Check current certificate expiration date\n2. Generate new Certificate Signing Request (CSR)\n3. Submit CSR to Certificate Authority\n4. Download new certificate files\n5. Backup current certificate\n6. Install new certificate on server\n7. Update web server configuration\n8. Restart web server\n9. Verify certificate installation\n10. Test HTTPS functionality\n\n**Important:**\n- Renew at least 30 days before expiration\n- Keep private key secure\n- Test on staging environment first"
+    },
+    {
+        "id": "disk_space_cleanup",
+        "title": "Disk Space Management",
+        "category": "System Maintenance",
+        "keywords": [
+            "disk",
+            "space",
+            "full",
+            "cleanup",
+            "storage"
+        ],
+        "content": "**Disk Space Cleanup Process**\n\n1. Check current disk usage: `df -h`\n2. Identify large files: `du -sh /* | sort -h`\n3. Review log files in /var/log\n4. Clear temporary files\n5. Remove old backup files\n6. Clean package manager cache\n7. Archive old data if needed\n8. Verify sufficient space restored\n\n**Safe Cleanup Locations:**\n- /tmp/\n- /var/tmp/\n- /var/log/ (rotate logs)\n- Package manager cache\n- Old backups\n\n**Do NOT delete:**\n- System files\n- Active databases\n- Current configurations"
+    },
+    {
+        "id": "email_setup",
+        "title": "Email Account Configuration",
+        "category": "Email Services",
+        "keywords": [
+            "email",
+            "setup",
+            "configuration",
+            "smtp",
+            "imap"
+        ],
+        "content": "**Email Account Setup**\n\n1. Access email control panel\n2. Create new email account\n3. Set quota and permissions\n4. Configure spam filtering\n5. Enable/disable features (webmail, forwarding)\n6. Provide client with connection details:\n\n**IMAP Settings:**\n- Server: mail.yourdomain.com\n- Port: 993 (SSL/TLS)\n- Security: SSL/TLS\n\n**SMTP Settings:**\n- Server: mail.yourdomain.com\n- Port: 587 (STARTTLS)\n- Security: STARTTLS\n- Authentication: Required\n\n**Webmail Access:**\n- URL: https://webmail.yourdomain.com"
+    },
+    {
+        "id": "database_backup",
+        "title": "Database Backup Procedure",
+        "category": "Database Management",
+        "keywords": [
+            "database",
+            "backup",
+            "mysql",
+            "postgres",
+            "dump"
+        ],
+        "content": "**Database Backup Process**\n\n**MySQL/MariaDB:**\n```bash\nmysqldump -u username -p database_name > backup_$(date +%Y%m%d).sql\n```\n\n**PostgreSQL:**\n```bash\npg_dump -U username database_name > backup_$(date +%Y%m%d).sql\n```\n\n**Steps:**\n1. Identify database to backup\n2. Choose backup method (full/incremental)\n3. Execute backup command\n4. Verify backup file created\n5. Test backup integrity\n6. Move to secure backup storage\n7. Document backup details\n8. Schedule automated backups\n\n**Best Practices:**\n- Regular backup schedule\n- Test restore procedures\n- Off-site backup storage\n- Encrypt sensitive data"
+    },
+    {
+        "id": "dns_configuration",
+        "title": "DNS Record Management",
+        "category": "DNS & Domains",
+        "keywords": [
+            "dns",
+            "domain",
+            "record",
+            "a",
+            "cname",
+            "mx"
+        ],
+        "content": "**DNS Record Configuration**\n\n**Common Record Types:**\n\n**A Record** (IPv4 Address)\n- Points domain to IP address\n- Example: example.com → 192.168.1.1\n\n**AAAA Record** (IPv6 Address)\n- Points domain to IPv6 address\n\n**CNAME Record** (Alias)\n- Points subdomain to another domain\n- Example: www.example.com → example.com\n\n**MX Record** (Mail Server)\n- Directs email to mail server\n- Requires priority value\n\n**TXT Record** (Text/Verification)\n- SPF, DKIM, domain verification\n\n**Configuration Steps:**\n1. Access DNS management panel\n2. Select record type\n3. Enter required values\n4. Set TTL (Time To Live)\n5. Save changes\n6. Wait for propagation (up to 48 hours)\n7. Verify using DNS lookup tools"
+    },
+    {
+        "id": "firewall_rules",
+        "title": "Firewall Configuration",
+        "category": "Security",
+        "keywords": [
+            "firewall",
+            "security",
+            "port",
+            "iptables",
+            "rules"
+        ],
+        "content": "**Firewall Rule Configuration**\n\n**Basic Principles:**\n- Default deny all traffic\n- Allow only necessary ports\n- Log suspicious activity\n\n**Common Ports to Allow:**\n- 22: SSH (restrict to specific IPs if possible)\n- 80: HTTP\n- 443: HTTPS\n- 25, 587, 465: SMTP (email)\n- 143, 993: IMAP (email)\n- 110, 995: POP3 (email)\n\n**UFW (Ubuntu) Example:**\n```bash\nsudo ufw default deny incoming\nsudo ufw default allow outgoing\nsudo ufw allow 22/tcp\nsudo ufw allow 80/tcp\nsudo ufw allow 443/tcp\nsudo ufw enable\n```\n\n**Best Practices:**\n- Review rules regularly\n- Use IP whitelisting for admin access\n- Enable rate limiting\n- Monitor firewall logs"
+    }
+]

@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  coagent:
+    build:
+      context: ./mvp
+      dockerfile: Dockerfile
+    container_name: coagent
+    env_file: .env
+    volumes:
+      - ./chroma_db:/app/chroma_db
+      - ./examples:/app/examples
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - coagent-network
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: coagent-admin
+    env_file: .env
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./examples:/app/examples
+      - ./chroma_db:/app/chroma_db
+    restart: unless-stopped
+    networks:
+      - coagent-network
+    depends_on:
+      - coagent
+
+networks:
+  coagent-network:
+    driver: bridge

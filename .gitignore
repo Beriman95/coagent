@@ -1,0 +1,60 @@
+# Secrets & Environment
+.env
+*.key
+*.pem
+secrets/
+
+# Data & Logs
+*.log
+query_log.json
+feedback.json
+scrape_status.json
+sync_history.json
+
+# Databases
+chroma_db/
+vectordb/
+*.db
+*.sqlite
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Backups
+backup_*/
+*_backup_*/
+*.tar.gz
+*.zip
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# System
+*.pid

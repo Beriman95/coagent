@@ -1,0 +1,51 @@
+[
+    {
+        "service": "Server Administration",
+        "base_fee": 50.00,
+        "hourly_rate": 75.00,
+        "currency": "USD",
+        "description": "Basic server administration tasks"
+    },
+    {
+        "service": "Emergency Support",
+        "base_fee": 100.00,
+        "hourly_rate": 150.00,
+        "currency": "USD",
+        "description": "24/7 emergency technical support"
+    },
+    {
+        "service": "Security Audit",
+        "base_fee": 200.00,
+        "hourly_rate": 100.00,
+        "currency": "USD",
+        "description": "Comprehensive security assessment"
+    },
+    {
+        "service": "Database Optimization",
+        "base_fee": 75.00,
+        "hourly_rate": 85.00,
+        "currency": "USD",
+        "description": "Database performance tuning and optimization"
+    },
+    {
+        "service": "SSL Certificate Installation",
+        "base_fee": 25.00,
+        "hourly_rate": 65.00,
+        "currency": "USD",
+        "description": "SSL/TLS certificate setup and configuration"
+    },
+    {
+        "service": "Email Configuration",
+        "base_fee": 30.00,
+        "hourly_rate": 60.00,
+        "currency": "USD",
+        "description": "Email server and account configuration"
+    },
+    {
+        "service": "Backup Setup",
+        "base_fee": 50.00,
+        "hourly_rate": 70.00,
+        "currency": "USD",
+        "description": "Automated backup configuration and testing"
+    }
+]

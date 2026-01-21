@@ -1,0 +1,426 @@
+"""
+CoAgent Admin API - Flask Backend
+Manages SOPs, KB, and provides monitoring endpoints
+"""
+
+from flask import Flask, jsonify, request, render_template, redirect, url_for, session
+from flask_cors import CORS
+import chromadb
+from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
+import json
+import os
+from datetime import datetime
+from functools import wraps
+
+# Load environment
+from dotenv import load_dotenv
+load_dotenv()
+
+app = Flask(__name__, static_folder='static', template_folder='templates')
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'coagent-admin-secret-key')
+CORS(app)
+
+# ChromaDB setup
+CHROMA_PATH = os.path.join(os.path.dirname(__file__), '..', 'chroma_db')
+embedding_fn = OpenAIEmbeddingFunction(
+    api_key=os.environ.get('OPENAI_API_KEY'),
+    model_name='text-embedding-3-small'
+)
+
+def get_collection():
+    """Get ChromaDB collection."""
+    client = chromadb.PersistentClient(path=CHROMA_PATH)
+    return client.get_collection('rackhost_knowledge', embedding_function=embedding_fn)
+
+
+# =============================================================================
+# SLACK OAUTH (Simplified for now - can be enhanced)
+# =============================================================================
+
+ALLOWED_USERS = os.environ.get('ADMIN_ALLOWED_USERS', '').split(',')
+
+def require_auth(f):
+    """Simple auth decorator - check if user is logged in."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('logged_in'):
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+# =============================================================================
+# API ROUTES - SOPs
+# =============================================================================
+
+@app.route('/api/sops', methods=['GET'])
+@require_auth
+def get_all_sops():
+    """Get all documents from ChromaDB."""
+    import re
+    try:
+        collection = get_collection()
+        results = collection.get()
+        
+        def extract_fee(content):
+            """Extract fee from content like '3.000 Ft' or 'nettó 5.000 Ft'"""
+            patterns = [
+                r'(\d{1,3}(?:\.\d{3})*)\s*Ft',  # 3.000 Ft
+                r'nettó\s+(\d{1,3}(?:\.\d{3})*)\s*Ft',  # nettó 3.000 Ft
+            ]
+            for pattern in patterns:
+                match = re.search(pattern, content, re.IGNORECASE)
+                if match:
+                    return match.group(0)
+            return None
+        
+        sops = []
+        for doc_id, doc, meta in zip(results['ids'], results['documents'], results['metadatas']):
+            fee = extract_fee(doc)
+            sops.append({
+                'id': doc_id,
+                'title': meta.get('title', 'N/A'),
+                'category': meta.get('category', 'unknown'),
+                'fee': fee,
+                'content': doc[:500] + '...' if len(doc) > 500 else doc,
+                'metadata': meta
+            })
+        
+        return jsonify({'success': True, 'sops': sops, 'count': len(sops)})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/sops/<sop_id>', methods=['GET'])
+@require_auth
+def get_sop(sop_id):
+    """Get single SOP by ID."""
+    try:
+        collection = get_collection()
+        result = collection.get(ids=[sop_id])
+        
+        if not result['ids']:
+            return jsonify({'success': False, 'error': 'SOP not found'}), 404
+        
+        return jsonify({
+            'success': True,
+            'sop': {
+                'id': result['ids'][0],
+                'content': result['documents'][0],
+                'metadata': result['metadatas'][0]
+            }
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/sops/<sop_id>', methods=['PUT'])
+@require_auth
+def update_sop(sop_id):
+    """Update SOP content and metadata."""
+    try:
+        data = request.json
+        collection = get_collection()
+        
+        # Update in ChromaDB
+        collection.update(
+            ids=[sop_id],
+            documents=[data.get('content')],
+            metadatas=[data.get('metadata', {})]
+        )
+        
+        return jsonify({'success': True, 'message': 'SOP updated'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/sops', methods=['POST'])
+@require_auth
+def create_sop():
+    """Create new SOP."""
+    try:
+        data = request.json
+        collection = get_collection()
+        
+        # Generate ID
+        sop_id = f"sop_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        
+        collection.add(
+            ids=[sop_id],
+            documents=[data.get('content')],
+            metadatas=[{
+                'title': data.get('title'),
+                'category': data.get('category', 'other'),
+                'type': 'sop_procedure',
+                'created': datetime.now().isoformat()
+            }]
+        )
+        
+        return jsonify({'success': True, 'id': sop_id, 'message': 'SOP created'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/sops/<sop_id>', methods=['DELETE'])
+@require_auth
+def delete_sop(sop_id):
+    """Archive (delete) SOP."""
+    try:
+        collection = get_collection()
+        
+        # First archive to file
+        result = collection.get(ids=[sop_id])
+        if result['ids']:
+            archive_path = os.path.join(os.path.dirname(__file__), 'archived_sops.json')
+            archived = []
+            if os.path.exists(archive_path):
+                with open(archive_path, 'r') as f:
+                    archived = json.load(f)
+            
+            archived.append({
+                'id': sop_id,
+                'content': result['documents'][0],
+                'metadata': result['metadatas'][0],
+                'archived_at': datetime.now().isoformat()
+            })
+            
+            with open(archive_path, 'w') as f:
+                json.dump(archived, f, ensure_ascii=False, indent=2)
+        
+        # Delete from ChromaDB
+        collection.delete(ids=[sop_id])
+        
+        return jsonify({'success': True, 'message': 'SOP archived and deleted'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# =============================================================================
+# API ROUTES - KB Articles
+# =============================================================================
+
+@app.route('/api/kb', methods=['GET'])
+@require_auth
+def get_all_kb():
+    """Get KB articles from kb_chunks.json file."""
+    try:
+        kb_path = os.path.join(os.path.dirname(__file__), '..', 'kb_chunks.json')
+        
+        if not os.path.exists(kb_path):
+            return jsonify({'success': True, 'articles': [], 'count': 0, 'message': 'kb_chunks.json not found'})
+        
+        with open(kb_path, 'r', encoding='utf-8') as f:
+            chunks = json.load(f)
+        
+        def extract_category(url):
+            """Extract category from URL like /tudasbazis/domain/..."""
+            if '/tudasbazis/' in url:
+                parts = url.split('/tudasbazis/')
+                if len(parts) > 1:
+                    cat = parts[1].split('/')[0] if '/' in parts[1] else parts[1]
+                    return cat if cat else 'altalanos'
+            return 'altalanos'
+        
+        # Group by title to get unique articles (not individual chunks)
+        articles_by_title = {}
+        for chunk in chunks:
+            title = chunk.get('title', 'N/A')
+            url = chunk.get('url', '')
+            if title not in articles_by_title:
+                articles_by_title[title] = {
+                    'id': chunk.get('id', ''),
+                    'title': title,
+                    'url': url,
+                    'category': extract_category(url),
+                    'source': chunk.get('source', 'rackhost.hu'),
+                    'chunks': 1
+                }
+            else:
+                articles_by_title[title]['chunks'] += 1
+        
+        articles = list(articles_by_title.values())
+        
+        return jsonify({'success': True, 'articles': articles, 'count': len(articles)})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# =============================================================================
+# API ROUTES - Monitoring
+# =============================================================================
+
+@app.route('/api/stats', methods=['GET'])
+@require_auth
+def get_stats():
+    """Get monitoring statistics."""
+    try:
+        # Load query log
+        log_path = os.path.join(os.path.dirname(__file__), '..', 'query_log.json')
+        logs = []
+        if os.path.exists(log_path):
+            with open(log_path, 'r') as f:
+                logs = json.load(f)
+        
+        # Date filter
+        date_from = request.args.get('from')
+        date_to = request.args.get('to')
+        
+        if date_from:
+            logs = [l for l in logs if l.get('timestamp', '') >= date_from]
+        if date_to:
+            logs = [l for l in logs if l.get('timestamp', '') <= date_to]
+        
+        # Calculate stats
+        total_queries = len(logs)
+        
+        # Category distribution
+        categories = {}
+        for log in logs:
+            cat = log.get('category', 'unknown')
+            categories[cat] = categories.get(cat, 0) + 1
+        
+        # Response times (if logged)
+        response_times = []
+        for l in logs:
+            if 'response_time_ms' in l:
+                response_times.append(l['response_time_ms'] / 1000)
+            elif 'response_time' in l:
+                response_times.append(l['response_time'])
+                
+        avg_response_time = sum(response_times) / len(response_times) if response_times else 0
+        
+        return jsonify({
+            'success': True,
+            'stats': {
+                'total_queries': total_queries,
+                'categories': categories,
+                'avg_response_time': round(avg_response_time, 2),
+                'period': {'from': date_from, 'to': date_to}
+            }
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# =============================================================================
+# API ROUTES - Fees
+# =============================================================================
+
+FEES_PATH = os.path.join(os.path.dirname(__file__), '..', 'fees.json')
+
+@app.route('/api/fees', methods=['GET'])
+@require_auth
+def get_all_fees():
+    """Get all fees from fees.json."""
+    try:
+        if not os.path.exists(FEES_PATH):
+            return jsonify({'success': True, 'fees': [], 'count': 0})
+        
+        with open(FEES_PATH, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        return jsonify({'success': True, 'fees': data.get('fees', []), 'count': len(data.get('fees', []))})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/fees/<fee_id>', methods=['PUT'])
+@require_auth
+def update_fee(fee_id):
+    """Update a fee."""
+    try:
+        with open(FEES_PATH, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        for i, fee in enumerate(data.get('fees', [])):
+            if fee['id'] == fee_id:
+                data['fees'][i].update(request.json)
+                data['last_updated'] = datetime.now().strftime('%Y-%m-%d')
+                break
+        
+        with open(FEES_PATH, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        
+        return jsonify({'success': True, 'message': 'Fee updated'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/fees', methods=['POST'])
+@require_auth
+def create_fee():
+    """Create new fee."""
+    try:
+        with open(FEES_PATH, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        new_fee = request.json
+        new_fee['id'] = f"fee_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        data['fees'].append(new_fee)
+        data['last_updated'] = datetime.now().strftime('%Y-%m-%d')
+        
+        with open(FEES_PATH, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        
+        return jsonify({'success': True, 'id': new_fee['id'], 'message': 'Fee created'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/fees/<fee_id>', methods=['DELETE'])
+@require_auth
+def delete_fee(fee_id):
+    """Delete fee."""
+    try:
+        with open(FEES_PATH, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        data['fees'] = [f for f in data.get('fees', []) if f['id'] != fee_id]
+        data['last_updated'] = datetime.now().strftime('%Y-%m-%d')
+        
+        with open(FEES_PATH, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        
+        return jsonify({'success': True, 'message': 'Fee deleted'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# =============================================================================
+# WEB ROUTES
+# =============================================================================
+
+@app.route('/')
+@require_auth
+def index():
+    """Main admin dashboard."""
+    return render_template('index.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Simple login page."""
+    if request.method == 'POST':
+        # For now, simple password auth
+        # TODO: Implement Slack OAuth
+        password = request.form.get('password')
+        if password == os.environ.get('ADMIN_PASSWORD', 'rackhost2026'):
+            session['logged_in'] = True
+            return redirect(url_for('index'))
+        return render_template('login.html', error='Hibás jelszó')
+    return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    """Logout."""
+    session.pop('logged_in', None)
+    return redirect(url_for('login'))
+
+
+# =============================================================================
+# MAIN
+# =============================================================================
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5001)

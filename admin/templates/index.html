@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoAgent Admin</title>
+    <!-- Premium Modern Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ==================== PREMIUM DESIGN SYSTEM ==================== */
+
+        :root {
+            /* Rackhost Brand Colors */
+            --rackhost-light: #eadff7;
+            --rackhost-medium: #ad83d4;
+            --rackhost-dark: #471d6e;
+            --rackhost-accent: #c31e73;
+
+            /* Premium Gradients */
+            --gradient-primary: linear-gradient(135deg, #471d6e 0%, #c31e73 100%);
+            --gradient-secondary: linear-gradient(135deg, #ad83d4 0%, #eadff7 100%);
+            --gradient-bg: linear-gradient(135deg, #eadff7 0%, #f8f5fc 50%, #ffffff 100%);
+
+            /* Glassmorphism */
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --glass-shadow: 0 8px 32px rgba(71, 29, 110, 0.1);
+
+            /* Shadows */
+            --shadow-sm: 0 2px 8px rgba(71, 29, 110, 0.08);
+            --shadow-md: 0 4px 16px rgba(71, 29, 110, 0.12);
+            --shadow-lg: 0 8px 32px rgba(71, 29, 110, 0.16);
+            --shadow-xl: 0 16px 48px rgba(71, 29, 110, 0.24);
+            --shadow-glow: 0 0 20px rgba(195, 30, 115, 0.4);
+
+            /* Typography */
+            --font-primary: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ==================== ANIMATED BACKGROUND ==================== */
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--gradient-bg);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(195, 30, 115, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(71, 29, 110, 0.05) 0%, transparent 50%);
+            animation: rotate 30s linear infinite;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ==================== HEADER (GLASSMORPHISM) ==================== */
+
+        .header {
+            background: rgba(71, 29, 110, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(71, 29, 110, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 28px;
+            background: linear-gradient(135deg, #fff 0%, #eadff7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        .header h1 span {
+            color: var(--rackhost-accent);
+            -webkit-text-fill-color: var(--rackhost-accent);
+        }
+
+        @keyframes shimmer {
+
+            0%,
+            100% {
+                filter: brightness(1);
+            }
+
+            50% {
+                filter: brightness(1.2);
+            }
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .header-actions span {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 2px solid var(--rackhost-accent);
+            color: var(--rackhost-accent);
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: var(--font-primary);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-logout::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--rackhost-accent);
+            transition: left 0.3s;
+            z-index: -1;
+        }
+
+        .btn-logout:hover::before {
+            left: 0;
+        }
+
+        .btn-logout:hover {
+            color: white;
+            box-shadow: 0 4px 16px rgba(195, 30, 115, 0.4);
+        }
+
+        /* ==================== NAVIGATION TABS ==================== */
+
+        .nav-tabs {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
+            margin: 24px 40px;
+            padding: 8px;
+            display: inline-flex;
+            gap: 4px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 1;
+            font-size: 15px;
+        }
+
+        .nav-tab:hover {
+            color: var(--rackhost-dark);
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .nav-tab.active {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 4px 16px rgba(195, 30, 115, 0.3),
+                0 0 20px rgba(195, 30, 115, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* ==================== MAIN CONTENT ==================== */
+
+        .main-content {
+            padding: 0 40px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* ==================== GLASS PANELS ==================== */
+
+        .panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: var(--glass-shadow),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            margin-bottom: 32px;
+            display: none;
+            border: 1px solid var(--glass-border);
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .panel-header {
+            padding: 28px 32px;
+            border-bottom: 1px solid rgba(71, 29, 110, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-family: var(--font-display);
+            font-size: 24px;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .panel-body {
+            padding: 32px;
+        }
+
+        /* ==================== PREMIUM BUTTONS ==================== */
+
+        .btn-primary {
+            position: relative;
+            background: var(--gradient-primary);
+            border: none;
+            color: white;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-family: var(--font-primary);
+            cursor: pointer;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(195, 30, 115, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            font-size: 15px;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(195, 30, 115, 0.4),
+                0 0 30px rgba(195, 30, 115, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(173, 131, 212, 0.2);
+            color: var(--rackhost-dark);
+            border: 2px solid var(--rackhost-medium);
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-family: var(--font-primary);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 15px;
+        }
+
+        .btn-secondary:hover {
+            background: var(--rackhost-medium);
+            color: white;
+            box-shadow: 0 4px 16px rgba(173, 131, 212, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* ==================== SEARCH BAR ==================== */
+
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid rgba(71, 29, 110, 0.1);
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: var(--font-primary);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: transparent;
+            box-shadow: 0 0 0 3px rgba(195, 30, 115, 0.2),
+                0 4px 16px rgba(195, 30, 115, 0.15);
+            background: white;
+        }
+
+        /* ==================== FLOATING CARDS ==================== */
+
+        .sop-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sop-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .sop-card:hover::before {
+            left: 100%;
+        }
+
+        .sop-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(71, 29, 110, 0.15),
+                0 0 0 1px rgba(195, 30, 115, 0.2),
+                0 0 20px rgba(195, 30, 115, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .sop-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .sop-info h3 {
+            color: var(--rackhost-dark);
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .sop-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .sop-category {
+            background: var(--gradient-secondary);
+            color: var(--rackhost-dark);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .sop-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* ==================== ICON BUTTONS ==================== */
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .btn-edit {
+            background: rgba(173, 131, 212, 0.2);
+            color: var(--rackhost-dark);
+        }
+
+        .btn-edit:hover {
+            background: var(--rackhost-medium);
+            color: white;
+            transform: rotate(15deg) scale(1.1);
+            box-shadow: 0 4px 12px rgba(173, 131, 212, 0.3);
+        }
+
+        .btn-delete {
+            background: rgba(255, 100, 100, 0.2);
+            color: #c00;
+            font-size: 28px;
+        }
+
+        .btn-delete:hover {
+            background: #c00;
+            color: white;
+            transform: rotate(-15deg) scale(1.1);
+            box-shadow: 0 4px 12px rgba(204, 0, 0, 0.3);
+        }
+
+        /* ==================== PREMIUM STAT CARDS ==================== */
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 32px;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(195, 30, 115, 0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-value {
+            font-size: 48px;
+            font-weight: 900;
+            font-family: var(--font-display);
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ==================== GLASSMORPHISM MODAL ==================== */
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 11, 46, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 24px 64px rgba(71, 29, 110, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            padding: 28px 32px;
+            border-bottom: 1px solid rgba(71, 29, 110, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-family: var(--font-display);
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 24px;
+        }
+
+        .modal-body {
+            padding: 32px;
+        }
+
+        .modal-footer {
+            padding: 24px 32px;
+            border-top: 1px solid rgba(71, 29, 110, 0.1);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* ==================== PREMIUM FORM INPUTS ==================== */
+
+        .form-group {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--rackhost-dark);
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid rgba(71, 29, 110, 0.1);
+            border-radius: 12px;
+            font-family: var(--font-primary);
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: transparent;
+            box-shadow: 0 0 0 3px rgba(195, 30, 115, 0.3),
+                0 4px 16px rgba(195, 30, 115, 0.2);
+            background: white;
+        }
+
+        .form-group textarea {
+            min-height: 300px;
+            resize: vertical;
+        }
+
+        /* ==================== LOADING STATES ==================== */
+
+        .loading {
+            text-align: center;
+            padding: 48px;
+            color: #888;
+            font-style: italic;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg,
+                    rgba(71, 29, 110, 0.05) 25%,
+                    rgba(195, 30, 115, 0.1) 50%,
+                    rgba(71, 29, 110, 0.05) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 12px;
+            height: 80px;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* ==================== PREMIUM TOAST ==================== */
+
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: var(--gradient-primary);
+            color: white;
+            padding: 20px 28px;
+            border-radius: 16px;
+            box-shadow: 0 12px 32px rgba(71, 29, 110, 0.3),
+                0 0 20px rgba(195, 30, 115, 0.2);
+            display: none;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, #2d9c45 0%, #1e7a33 100%);
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, #c00 0%, #900 100%);
+        }
+
+        .toast.show {
+            display: block;
+            animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* ==================== DATE FILTER ==================== */
+
+        .date-filter {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .date-filter label {
+            color: var(--rackhost-dark);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .date-filter input[type="date"] {
+            padding: 12px 16px;
+            border: 2px solid rgba(71, 29, 110, 0.1);
+            border-radius: 12px;
+            font-family: var(--font-primary);
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .date-filter input[type="date"]:focus {
+            outline: none;
+            border-color: transparent;
+            box-shadow: 0 0 0 3px rgba(195, 30, 115, 0.2),
+                0 4px 16px rgba(195, 30, 115, 0.15);
+            background: white;
+        }
+
+        /* ==================== TABLE STYLES ==================== */
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        table thead tr {
+            background: var(--gradient-secondary);
+        }
+
+        table th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 700;
+            color: var(--rackhost-dark);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        table tbody tr {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateX(4px);
+            box-shadow: -4px 0 0 var(--rackhost-accent), 0 4px 12px rgba(195, 30, 115, 0.15);
+        }
+
+        table td {
+            padding: 16px;
+            border-top: 1px solid rgba(71, 29, 110, 0.05);
+            border-bottom: 1px solid rgba(71, 29, 110, 0.05);
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 16px 20px;
+            }
+
+            .nav-tabs {
+                margin: 16px 20px;
+                flex-wrap: wrap;
+            }
+
+            .main-content {
+                padding: 0 20px 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1><span>🚀</span> CoAgent <span>Admin</span></h1>
+        <div class="header-actions">
+            <span id="sopCount">-- SOP</span>
+            <a href="/logout" class="btn-logout">Kilépés</a>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav-tabs">
+        <div class="nav-tab active" data-tab="sops">📋 SOPs</div>
+        <div class="nav-tab" data-tab="kb">📚 KB Cikkek</div>
+        <div class="nav-tab" data-tab="fees">💰 Díjak</div>
+        <div class="nav-tab" data-tab="rules">🧠 Szabályok</div>
+        <div class="nav-tab" data-tab="monitor">📊 Monitoring</div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Rules Panel -->
+        <div class="panel" id="panel-rules">
+            <div class="panel-header">
+                <h2 class="panel-title">CoAgent Viselkedési Szabályok (Prompts)</h2>
+                <button class="btn-primary" onclick="createNewRule()">+ Új Szabály</button>
+            </div>
+            <div class="panel-body">
+                <p style="margin-bottom: 20px; color: #666;">Ezek a szabályok határozzák meg a bot viselkedését ("System
+                    Prompt"). Azonnal érvénybe lépnek szerkesztés után!</p>
+                <div class="stats-grid" style="grid-template-columns: 1fr;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr
+                                style="text-align: left; background: #f8f9fa; border-bottom: 2px solid var(--rackhost-light);">
+                                <th style="padding: 12px;">Kategória</th>
+                                <th style="padding: 12px;">Szabály Tartalma</th>
+                                <th style="padding: 12px;">Prioritás</th>
+                                <th style="padding: 12px; text-align: center;">Műveletek</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rulesTableBody">
+                            <tr>
+                                <td colspan="4" class="loading">Betöltés...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- SOPs Panel -->
+        <div class="panel active" id="panel-sops">
+            <div class="panel-header">
+                <h2 class="panel-title">Standard Operating Procedures</h2>
+                <button class="btn-primary" onclick="openNewSopModal()">+ Új SOP</button>
+            </div>
+            <div class="panel-body">
+                <div class="search-bar">
+                    <input type="text" class="search-input" id="sopSearch" placeholder="Keresés SOP-ok között...">
+                    <select id="categoryFilter" class="search-input" style="max-width: 200px;">
+                        <option value="">Minden kategória</option>
+                        <option value="domain">Domain</option>
+                        <option value="email">Email</option>
+                        <option value="hosting">Hosting</option>
+                        <option value="technical">Technical</option>
+                        <option value="billing">Billing</option>
+                    </select>
+                </div>
+                <div class="sop-list" id="sopList">
+                    <div class="loading">Betöltés...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KB Panel -->
+        <div class="panel" id="panel-kb">
+            <div class="panel-header">
+                <h2 class="panel-title">Tudásbázis Cikkek <span id="kbSyncStatus"
+                        style="font-size: 12px; margin-left: 10px;"></span></h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-secondary" onclick="syncKb()" id="kbSyncBtn">🔄 Szinkronizálás</button>
+                    <button class="btn-primary" onclick="openNewKbModal()">+ Új Cikk</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="search-bar">
+                    <input type="text" class="search-input" id="kbSearch" placeholder="Keresés cikkek között...">
+                </div>
+                <div class="sop-list" id="kbList">
+                    <div class="loading">Betöltés...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fees Panel -->
+        <div class="panel" id="panel-fees">
+            <div class="panel-header">
+                <h2 class="panel-title">Díjak Összefoglaló</h2>
+                <button class="btn-primary" onclick="createNewFee()">+ Új Díj</button>
+            </div>
+            <div class="panel-body">
+                <p style="margin-bottom: 20px; color: #666;">Az alábbi díjak a SOP-okból automatikusan kerülnek
+                    kinyerésre. A módosításhoz szerkeszd a megfelelő SOP-ot.</p>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: var(--rackhost-light);">
+                            <th
+                                style="padding: 12px; text-align: left; border-bottom: 2px solid var(--rackhost-medium);">
+                                Folyamat</th>
+                            <th
+                                style="padding: 12px; text-align: left; border-bottom: 2px solid var(--rackhost-medium);">
+                                Kategória</th>
+                            <th
+                                style="padding: 12px; text-align: right; border-bottom: 2px solid var(--rackhost-medium);">
+                                Díj</th>
+                            <th
+                                style="padding: 12px; text-align: center; border-bottom: 2px solid var(--rackhost-medium);">
+                                Művelet</th>
+                        </tr>
+                    </thead>
+                    <tbody id="feesTableBody">
+                        <tr>
+                            <td colspan="4" class="loading">Betöltés...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Monitoring Panel -->
+        <div class="panel" id="panel-monitor">
+            <div class="panel-header">
+                <h2 class="panel-title">Monitoring Dashboard</h2>
+            </div>
+            <div class="panel-body">
+                <div class="date-filter">
+                    <label>Időszak:</label>
+                    <input type="date" id="dateFrom">
+                    <span>-</span>
+                    <input type="date" id="dateTo">
+                    <button class="btn-secondary" onclick="loadStats()">Szűrés</button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalQueries">--</div>
+                        <div class="stat-label">Összes kérdés</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgResponseTime">--</div>
+                        <div class="stat-label">Átlag válaszidő</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="todayQueries">--</div>
+                        <div class="stat-label">Mai kérdések</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="sopCount2">--</div>
+                        <div class="stat-label">Aktív SOP</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-bottom: 16px; color: var(--rackhost-dark);">Kategória eloszlás</h3>
+                <div style="display: flex; gap: 32px; flex-wrap: wrap;">
+                    <div id="categoryList" style="flex: 1; min-width: 200px;">
+                        <p style="color: #888;">Betöltés...</p>
+                    </div>
+                    <div style="flex: 1; min-width: 300px; max-width: 400px;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">SOP Szerkesztése</h2>
+                <button class="btn-icon" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>Cím</label>
+                    <input type="text" id="editTitle">
+                </div>
+                <div class="form-group">
+                    <label>Kategória</label>
+                    <select id="editCategory">
+                        <option value="domain">Domain</option>
+                        <option value="email">Email</option>
+                        <option value="hosting">Hosting</option>
+                        <option value="technical">Technical</option>
+                        <option value="billing">Billing</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tartalom</label>
+                    <textarea id="editContent"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal()">Mégse</button>
+                <button class="btn-primary" onclick="saveSop()">Mentés</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KB Detail Modal -->
+    <div class="modal-overlay" id="kbModal">
+        <div class="modal" style="max-width: 800px; width: 90%;">
+            <div class="modal-header">
+                <h2 id="kbModalTitle">KB Cikk Részletek</h2>
+                <button class="btn-icon" onclick="closeKbModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="kbModalBody">
+                <!-- Content injected via JS -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeKbModal()">Bezárás</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Tab Navigation
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+
+                tab.classList.add('active');
+                document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type + ' show';
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Close functions
+        function closeModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        function closeKbModal() {
+            document.getElementById('kbModal').classList.remove('active');
+        }
+
+        // Load SOPs
+        async function loadSops() {
+            try {
+                const res = await fetch('/api/sops');
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('sopCount').textContent = data.count + ' SOP';
+                    document.getElementById('sopCount2').textContent = data.count;
+                    renderSops(data.sops);
+                }
+            } catch (err) {
+                console.error('Error loading SOPs:', err);
+            }
+        }
+
+        function renderSops(sops) {
+            const container = document.getElementById('sopList');
+            const search = document.getElementById('sopSearch').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+
+            const filtered = sops.filter(sop => {
+                const matchSearch = sop.title.toLowerCase().includes(search);
+                const matchCategory = !category || sop.category === category;
+                return matchSearch && matchCategory;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="loading">Nincs találat</div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(sop => `
+                <div class="sop-card">
+                    <div class="sop-info">
+                        <h3>${sop.title}</h3>
+                        <div class="sop-meta">
+                            <span class="sop-category">${sop.category}</span>
+                            ${sop.fee ? `<span style="color: #c31e73; font-weight: 700;">💰 ${sop.fee}</span>` : ''}
+                            <span>ID: ${sop.id}</span>
+                        </div>
+                    </div>
+                    <div class="sop-actions">
+                        <button class="btn-icon btn-edit" onclick="editSop('${sop.id}')" title="Szerkesztés">✎</button>
+                        <button class="btn-icon btn-delete" onclick="deleteSop('${sop.id}')" title="Törlés">×</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Search handlers
+        document.getElementById('sopSearch').addEventListener('input', loadSops);
+        document.getElementById('categoryFilter').addEventListener('change', loadSops);
+
+        // Edit SOP
+        async function editSop(id) {
+            try {
+                const res = await fetch('/api/sops/' + id);
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('editId').value = id;
+                    document.getElementById('editTitle').value = data.sop.metadata.title || '';
+                    document.getElementById('editCategory').value = data.sop.metadata.category || 'other';
+                    document.getElementById('editContent').value = data.sop.content || '';
+                    document.getElementById('modalTitle').textContent = 'SOP Szerkesztése';
+                    document.getElementById('editModal').classList.add('active');
+                }
+            } catch (err) {
+                showToast('Hiba a betöltéskor', 'error');
+            }
+        }
+
+        function openNewSopModal() {
+            document.getElementById('editId').value = '';
+            document.getElementById('editTitle').value = '';
+            document.getElementById('editCategory').value = 'domain';
+            document.getElementById('editContent').value = '';
+            document.getElementById('modalTitle').textContent = 'Új SOP Létrehozása';
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        // Save SOP
+        async function saveSop() {
+            const id = document.getElementById('editId').value;
+            const title = document.getElementById('editTitle').value;
+            const category = document.getElementById('editCategory').value;
+            const content = document.getElementById('editContent').value;
+
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? '/api/sops/' + id : '/api/sops';
+
+            try {
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title,
+                        category,
+                        content,
+                        metadata: { title, category, type: 'sop_procedure' }
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast(id ? 'SOP frissítve!' : 'SOP létrehozva!');
+                    closeModal();
+                    loadSops();
+                } else {
+                    showToast('Hiba: ' + data.error, 'error');
+                }
+            } catch (err) {
+                showToast('Hiba a mentéskor', 'error');
+            }
+        }
+
+        // Delete SOP
+        async function deleteSop(id) {
+            if (!confirm('Biztosan törölni akarod ezt az SOP-ot?')) return;
+
+            try {
+                const res = await fetch('/api/sops/' + id, { method: 'DELETE' });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('SOP archiválva és törölve!');
+                    loadSops();
+                }
+            } catch (err) {
+                showToast('Hiba a törléskor', 'error');
+            }
+        }
+
+        // Load Stats
+        let categoryChartInstance = null;
+
+        async function loadStats() {
+            const from = document.getElementById('dateFrom').value;
+            const to = document.getElementById('dateTo').value;
+
+            try {
+                const params = new URLSearchParams();
+                if (from) params.append('from', from);
+                if (to) params.append('to', to);
+
+                const res = await fetch('/api/stats?' + params);
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('totalQueries').textContent = data.stats.total_queries;
+                    document.getElementById('avgResponseTime').textContent = data.stats.avg_response_time + 's';
+
+                    // Render category list
+                    const categories = data.stats.categories || {};
+                    const catList = document.getElementById('categoryList');
+
+                    if (Object.keys(categories).length === 0) {
+                        catList.innerHTML = '<p style="color: #888;">Nincs kategória adat</p>';
+                    } else {
+                        const categoryColors = {
+                            'domain': '#471d6e',
+                            'email': '#c31e73',
+                            'hosting': '#ad83d4',
+                            'technical': '#2196F3',
+                            'billing': '#4CAF50',
+                            'general': '#9E9E9E'
+                        };
+
+                        catList.innerHTML = Object.entries(categories)
+                            .sort((a, b) => b[1] - a[1])
+                            .map(([cat, count]) => `
+                                <div style="display: flex; justify-content: space-between; padding: 8px 12px; background: #f8f5fc; border-radius: 6px; margin-bottom: 8px;">
+                                    <span style="font-weight: 500; color: ${categoryColors[cat] || '#666'};">${cat}</span>
+                                    <span style="font-weight: 700;">${count}</span>
+                                </div>
+                            `).join('');
+
+                        // Render pie chart
+                        const ctx = document.getElementById('categoryChart').getContext('2d');
+
+                        if (categoryChartInstance) {
+                            categoryChartInstance.destroy();
+                        }
+
+                        categoryChartInstance = new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: Object.keys(categories),
+                                datasets: [{
+                                    data: Object.values(categories),
+                                    backgroundColor: Object.keys(categories).map(c => categoryColors[c] || '#9E9E9E'),
+                                    borderWidth: 2,
+                                    borderColor: '#fff'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom'
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading stats:', err);
+            }
+        }
+
+        // Load KB
+        let kbArticles = []; // Local cache for filtering
+
+        async function loadKb() {
+            try {
+                const res = await fetch('/api/kb');
+                const data = await res.json();
+
+                if (data.success) {
+                    kbArticles = data.articles || [];
+                    renderKb();
+                }
+            } catch (err) {
+                console.error('Error loading KB:', err);
+            }
+        }
+
+        function renderKb() {
+            const container = document.getElementById('kbList');
+            const search = document.getElementById('kbSearch').value.toLowerCase();
+
+            // Filter articles
+            const filtered = kbArticles.filter(article => {
+                return article.title.toLowerCase().includes(search) ||
+                    (article.category && article.category.toLowerCase().includes(search));
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="loading">Nincs találat</div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(article => {
+                // Manually replace single quotes to avoid breaking HTML attribute
+                const safeTitle = encodeURIComponent(article.title).replace(/'/g, "%27");
+                return `
+                <div class="sop-card" style="cursor: pointer;" onclick="openKbDetail('${safeTitle}')">
+                    <div class="sop-info">
+                        <h3>${article.title}</h3>
+                        <div class="sop-meta">
+                            <span class="sop-category">${article.category || 'altalanos'}</span>
+                            <span>${article.chunks} chunk</span>
+                            ${article.url ? `<a href="${article.url}" target="_blank" onclick="event.stopPropagation()">🔗</a>` : '<span style="color: #c31e73;">📝 AI</span>'}
+                        </div>
+                    </div>
+                    <div class="sop-actions">
+                        <button class="btn-icon btn-edit" onclick="event.stopPropagation(); openKbDetail('${safeTitle}')" title="Megtekintés">⊕</button>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        // KB Search Listener
+        document.getElementById('kbSearch').addEventListener('input', renderKb);
+
+        // KB Sync function
+        async function syncKb() {
+            const btn = document.getElementById('kbSyncBtn');
+            const status = document.getElementById('kbSyncStatus');
+
+            if (!confirm('Szinkronizálás indítása? Ez több percig is eltarthat.')) return;
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Indítás...';
+            status.textContent = '(szinkronizálás folyamatban...)';
+            status.style.color = '#c31e73';
+
+            try {
+                const res = await fetch('/api/kb/sync', { method: 'POST' });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('Szinkronizálás elindult!', 'success');
+                    // Start polling for status
+                    pollSyncStatus();
+                } else {
+                    showToast('Hiba: ' + data.error, 'error');
+                    btn.disabled = false;
+                    btn.textContent = '🔄 Szinkronizálás';
+                    status.textContent = '';
+                }
+            } catch (err) {
+                showToast('Hiba: ' + err.message, 'error');
+                btn.disabled = false;
+                btn.textContent = '🔄 Szinkronizálás';
+                status.textContent = '';
+            }
+        }
+
+        // Poll sync status
+        async function pollSyncStatus() {
+            const btn = document.getElementById('kbSyncBtn');
+            const status = document.getElementById('kbSyncStatus');
+
+            try {
+                const res = await fetch('/api/kb/sync/status');
+                const data = await res.json();
+
+                if (data.status === 'running') {
+                    status.textContent = '(szinkronizálás folyamatban...)';
+                    setTimeout(pollSyncStatus, 3000);
+                } else if (data.status === 'completed') {
+                    status.textContent = '✅ Kész!';
+                    status.style.color = '#2d9c45';
+                    btn.disabled = false;
+                    btn.textContent = '🔄 Szinkronizálás';
+                    showToast('Szinkronizálás kész!', 'success');
+                    loadKb(); // Reload KB list
+                    setTimeout(() => { status.textContent = ''; }, 5000);
+                } else if (data.status === 'error' || data.status === 'timeout') {
+                    status.textContent = '❌ Hiba';
+                    status.style.color = '#c00';
+                    btn.disabled = false;
+                    btn.textContent = '🔄 Szinkronizálás';
+                    showToast('Szinkronizálás sikertelen', 'error');
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = '🔄 Szinkronizálás';
+                }
+            } catch (err) {
+                console.error('Sync status error:', err);
+                btn.disabled = false;
+                btn.textContent = '🔄 Szinkronizálás';
+            }
+        }
+
+        // Open KB article detail
+        async function openKbDetail(encodedTitle) {
+            const title = decodeURIComponent(encodedTitle);
+
+            const modal = document.getElementById('kbModal');
+            const modalTitle = document.getElementById('kbModalTitle');
+            const modalBody = document.getElementById('kbModalBody');
+
+            try {
+                // Show loading
+                modalTitle.textContent = 'Betöltés...';
+                modalBody.innerHTML = '<div class="loading">Cikk betöltése...</div>';
+                modal.classList.add('active');
+
+                const res = await fetch('/api/kb/article/' + encodedTitle);
+
+                // Check for redirect (Session expired)
+                if (res.redirected && res.url.includes('login')) {
+                    alert('A munkamenet lejárt. Kérlek jelentkezz be újra!');
+                    window.location.href = '/login';
+                    return;
+                }
+
+                // Check status
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error(`Server Error ${res.status}: ${text.substring(0, 100)}`);
+                }
+
+                const data = await res.json();
+
+                if (data.success) {
+                    const content = data.chunks.map((c, i) =>
+                        `<div style="margin-bottom: 15px; padding: 10px; background: #f8f5fc; border-radius: 8px;">
+                            <small style="color: #888;">Chunk ${i + 1}/${data.total_chunks}</small>
+                            <p style="white-space: pre-wrap; margin-top: 5px;">${c.text}</p>
+                        </div>`
+                    ).join('');
+
+                    modalTitle.textContent = 'KB Cikk: ' + title;
+                    modalBody.innerHTML = `
+                        <div style="margin-bottom: 15px;">
+                            ${data.url ? `<a href="${data.url}" target="_blank" style="color: var(--rackhost-accent);">🔗 Eredeti cikk megtekintése</a>` : '<span style="color: #888;">📝 AI-generált tartalom (nincs URL)</span>'}
+                        </div>
+                        <div style="max-height: 60vh; overflow-y: auto;">
+                            ${content}
+                        </div>
+                    `;
+                } else {
+                    modal.classList.remove('active');
+                    showToast('Hiba: ' + (data.error || 'Ismeretlen hiba'), 'error');
+                }
+            } catch (err) {
+                console.error('Error loading KB article:', err);
+                if (document.getElementById('kbModal')) {
+                    document.getElementById('kbModal').classList.remove('active');
+                }
+                showToast('Hiba: ' + err.message, 'error');
+                alert('Részletes hiba:\n' + err.message);
+            }
+        }
+
+        // Placeholder for new KB modal
+        function openNewKbModal() {
+            showToast('Új cikk hozzáadása: Használd a Szinkronizálás gombot a tudásbázis frissítéséhez', 'success');
+        }
+
+
+        // Load Fees
+        async function loadFees() {
+            try {
+                const res = await fetch('/api/fees');
+                const data = await res.json();
+
+                if (data.success) {
+                    const tbody = document.getElementById('feesTableBody');
+
+                    if (data.fees.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #888;">Nincs díj megadva</td></tr>';
+                        return;
+                    }
+
+                    tbody.innerHTML = data.fees.map(fee => `
+                        <tr style="border-bottom: 1px solid var(--rackhost-light);">
+                            <td style="padding: 12px;">${fee.service}</td>
+                            <td style="padding: 12px;"><span class="sop-category">${fee.category}</span></td>
+                            <td style="padding: 12px; text-align: right; font-weight: 700; color: var(--rackhost-accent);">${fee.price_formatted}</td>
+                            <td style="padding: 12px; text-align: center;">
+                                <button class="btn-icon btn-edit" onclick="editFee('${fee.id}', '${fee.service}', ${fee.price})" title="Szerkesztés">✎</button>
+                                <button class="btn-icon btn-delete" onclick="deleteFee('${fee.id}')" title="Törlés">×</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Error loading fees:', err);
+            }
+        }
+
+        function editFee(id, service, price) {
+            const newPrice = prompt('Új díj a "' + service + '" szolgáltatáshoz (Ft):', price);
+            if (newPrice && !isNaN(newPrice)) {
+                fetch('/api/fees/' + id, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        price: parseInt(newPrice),
+                        price_formatted: parseInt(newPrice).toLocaleString('hu-HU') + ' Ft'
+                    })
+                }).then(() => { showToast('Díj frissítve!'); loadFees(); });
+            }
+        }
+
+        async function createNewFee() {
+            const service = prompt('Szolgáltatás neve (pl. ".hu domain regisztráció"):');
+            if (!service) return;
+
+            const category = prompt('Kategória (domain, hosting, email, technical, billing):', 'domain');
+            if (!category) return;
+
+            const price = prompt('Ár (csak szám, pl. 3000):');
+            if (!price || isNaN(price)) return;
+
+            try {
+                const res = await fetch('/api/fees', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        service: service,
+                        category: category,
+                        price: parseInt(price),
+                        price_formatted: parseInt(price).toLocaleString('hu-HU') + ' Ft',
+                        type: 'one_time',
+                        notes: ''
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('Új díj hozzáadva!');
+                    loadFees();
+                } else {
+                    showToast('Hiba: ' + data.error, 'error');
+                }
+            } catch (err) {
+                showToast('Hiba a mentéskor', 'error');
+            }
+        }
+
+        async function deleteFee(id) {
+            if (!confirm('Biztosan törölni akarod ezt a díjat?')) return;
+            await fetch('/api/fees/' + id, { method: 'DELETE' });
+            showToast('Díj törölve!');
+            loadFees();
+        }
+
+        // Load Rules
+        async function loadRules() {
+            try {
+                const res = await fetch('/api/rules');
+                const data = await res.json();
+
+                if (data.success) {
+                    const tbody = document.getElementById('rulesTableBody');
+
+                    if (data.rules.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #888;">Nincs szabály definiálva</td></tr>';
+                        return;
+                    }
+
+                    // Sort by priority (critical first)
+                    const priorityOrder = { 'critical': 0, 'high': 1, 'medium': 2, 'low': 3 };
+                    data.rules.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+
+                    tbody.innerHTML = data.rules.map(rule => `
+                        <tr style="border-bottom: 1px solid var(--rackhost-light);">
+                            <td style="padding: 12px;"><span class="sop-category">${rule.category}</span></td>
+                            <td style="padding: 12px; font-family: monospace; font-size: 0.9em; color: #333;">${rule.content}</td>
+                            <td style="padding: 12px;">${getPriorityBadge(rule.priority)}</td>
+                            <td style="padding: 12px; text-align: center;">
+                                <button class="btn-icon btn-edit" onclick="editRule('${rule.id}', '${rule.content.replace(/'/g, "\\'")}', '${rule.priority}')" title="Szerkesztés">✎</button>
+                                <button class="btn-icon btn-delete" onclick="deleteRule('${rule.id}')" title="Törlés">×</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Error loading rules:', err);
+            }
+        }
+
+        function getPriorityBadge(priority) {
+            const styles = {
+                'critical': {
+                    gradient: 'linear-gradient(135deg, #dc3545 0%, #900 100%)',
+                    icon: '⚡',
+                    label: 'KRITIKUS',
+                    shadow: '0 4px 12px rgba(220, 53, 69, 0.3)'
+                },
+                'high': {
+                    gradient: 'linear-gradient(135deg, #fd7e14 0%, #d66900 100%)',
+                    icon: '⚠',
+                    label: 'MAGAS',
+                    shadow: '0 4px 12px rgba(253, 126, 20, 0.3)'
+                },
+                'medium': {
+                    gradient: 'linear-gradient(135deg, #ffc107 0%, #d99000 100%)',
+                    icon: '■',
+                    label: 'KÖZEPES',
+                    shadow: '0 4px 12px rgba(255, 193, 7, 0.3)'
+                },
+                'low': {
+                    gradient: 'linear-gradient(135deg, #28a745 0%, #1e7a33 100%)',
+                    icon: '●',
+                    label: 'ALACSONY',
+                    shadow: '0 4px 12px rgba(40, 167, 69, 0.3)'
+                }
+            };
+
+            const style = styles[priority] || {
+                gradient: 'linear-gradient(135deg, #6c757d 0%, #495057 100%)',
+                icon: '○',
+                label: priority.toUpperCase(),
+                shadow: '0 4px 12px rgba(108, 117, 125, 0.3)'
+            };
+
+            return `<span style="
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                background: ${style.gradient};
+                color: white;
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                box-shadow: ${style.shadow};
+                backdrop-filter: blur(10px);
+            ">${style.icon} ${style.label}</span>`;
+        }
+
+        async function createNewRule() {
+            const content = prompt('Szabály tartalma (pl. "HA .hu domain..."):');
+            if (!content) return;
+
+            const category = prompt('Kategória (domain, auth, billing, general):', 'general');
+            const priority = prompt('Prioritás (critical, high, medium, low):', 'medium');
+
+            try {
+                await fetch('/api/rules', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content, category, priority })
+                });
+                showToast('Szabály létrehozva!');
+                loadRules();
+            } catch (e) { showToast('Hiba', 'error'); }
+        }
+
+        async function editRule(id, content, priority) {
+            const newContent = prompt('Szabály módosítása:', content);
+            if (!newContent) return;
+
+            try {
+                await fetch('/api/rules/' + id, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: newContent })
+                });
+                showToast('Szabály frissítve!');
+                loadRules();
+            } catch (e) { showToast('Hiba', 'error'); }
+        }
+
+        async function deleteRule(id) {
+            if (!confirm('Biztosan törölni akarod ezt a szabályt?')) return;
+            await fetch('/api/rules/' + id, { method: 'DELETE' });
+            loadRules();
+        }
+
+        // Initialize
+        loadSops();
+        loadKb();
+        loadFees();
+        loadRules();
+
+        // Set default dates FIRST (before loadStats)
+        const today = new Date().toISOString().split('T')[0];
+        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        document.getElementById('dateTo').value = today;
+        document.getElementById('dateFrom').value = weekAgo;
+
+        // Now load stats (dates are set)
+        loadStats();
+    </script>
+</body>
+
+</html>
