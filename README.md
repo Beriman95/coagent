@@ -42,43 +42,43 @@
 
 ```mermaid
 graph TD
-    %% Actors
-    User((👤 Agent))
+    %% Entities
+    User((👤 User / Agent))
     Admin((👨‍💼 Admin))
     
-    %% Components
-    subgraph "Core System"
+    %% Main Components
+    subgraph "Execution Flow"
         Slack[💬 Slack]
-        Bot[🤖 MVP Bot\n(Python Script)]
-        AdminUI[🎨 Admin Panel\n(Flask App)]
+        MVP[🤖 CoAgent MVP]
+        LLM[🧠 GPT-4o-mini]
     end
     
-    %% Data Store (Shared Files)
-    subgraph "File Storage (The DB)"
-        JSONs[(📄 JSON Files\nSOPs, KB, Fees, Feedback)]
-        VectorDB[(🧠 ChromaDB\nVector Index)]
+    subgraph "Context & Management"
+        AdminUI[🎨 Admin UI]
+        Context[(🗂️ SOPs & VectorDB)]
     end
     
-    %% Flows
-    User <-->|Chat & !javítás| Slack
-    Slack <-->|Events| Bot
+    %% The Flow
+    User -->|Ticket / Question| Slack
+    Slack -->|Pass Query| MVP
     
-    Bot -->|Read & Watch| JSONs
-    Bot -->|Search| VectorDB
-    Bot -->|Write Feedback| JSONs
+    MVP -->|1. Generate Embedding| MVP
+    MVP -->|2. Retrieve Context| Context
+    MVP -->|3. Send Prompt + Context| LLM
+    LLM -->|4. Answer| Slack
+    Slack -->|5. Reply| User
     
-    Admin -->|Manage| AdminUI
-    AdminUI -->|Read Feedback| JSONs
-    AdminUI -->|Update/Approve SOPs| JSONs
-    AdminUI -->|Re-Index| VectorDB
+    %% Management Flow
+    Admin -->|Edit / Approve| AdminUI
+    AdminUI -->|Update Files| Context
+    Context -.->|🔥 HOT RELOAD| MVP
     
-    %% Logic Links
-    JSONs -.->|Hot-Reload| Bot
-
     %% Styling
-    style Bot fill:#c31e73,color:#fff
+    style MVP fill:#c31e73,color:#fff
     style AdminUI fill:#471d6e,color:#fff
-    style JSONs fill:#f9f9f9,stroke:#333,stroke-width:2px
+    style LLM fill:#412991,color:#fff
+    style Context fill:#2d9cdb,color:#fff
+
 ```
 
 ### Data Flow
