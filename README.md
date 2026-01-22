@@ -73,6 +73,7 @@ graph TB
     JSONFiles -->|Hot-Reload| FileWatcher[👁️ File Watcher]
     FileWatcher -->|Update Cache| SOPCache
     JSONFiles -->|Sync| VectorDB
+
     %% Styling
     style CoAgent fill:#c31e73,color:#fff
     style LLM fill:#412991,color:#fff
