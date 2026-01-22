@@ -43,34 +43,34 @@
 ```mermaid
 graph TB
     %% Users & Entry Points
-    User[👤 Support Agent] -->|Query| Slack[💬 Slack Interface]
+    User["👤 Support Agent"] -->|Query| Slack["💬 Slack Interface"]
     User -->|"!javítás"| Slack
     
-    Slack -->|REST / Socket| CoAgent[🤖 CoAgent MVP Bot]
+    Slack -->|REST / Socket| CoAgent["🤖 CoAgent MVP Bot"]
     
     %% Feedback Loop
-    CoAgent -->|Save Feedback| FeedbackStore[(📝 feedback.json)]
-    Admin[👨‍💼 Admin] -->|Review & Approve| AdminUI[🎨 Admin Dashboard]
+    CoAgent -->|Save Feedback| FeedbackStore[("📝 feedback.json")]
+    Admin["👨‍💼 Admin"] -->|Review & Approve| AdminUI["🎨 Admin Dashboard"]
     AdminUI -->|Read Pending| FeedbackStore
-    AdminUI -->|Create SOP / KB| JSONFiles[📄 Data Store\n(SOPs, KB, Fees)]
+    AdminUI -->|Create SOP / KB| JSONFiles["📄 Data Store<br>(SOPs, KB, Fees)"]
     
     %% Core Logic & Search
-    CoAgent -->|Determine Intent| SearchLogic[🔍 Hybrid Search Engine]
+    CoAgent -->|Determine Intent| SearchLogic["🔍 Hybrid Search Engine"]
     
-    SearchLogic -->|1. Keyword Check| SOPCache[(📋 SOP Cache\nIn-Memory)]
-    SearchLogic -->|2. Semantic Search| VectorDB[(🧠 VectorDB\nChromaDB)]
+    SearchLogic -->|1. Keyword Check| SOPCache[("📋 SOP Cache<br>In-Memory")]
+    SearchLogic -->|2. Semantic Search| VectorDB[("🧠 VectorDB<br>ChromaDB")]
     
-    SOPCache -->|If Match Found| NoiseFilter{⚡ Anti-Hallucination\nFilter}
+    SOPCache -->|If Match Found| NoiseFilter{"⚡ Anti-Hallucination<br>Filter"}
     VectorDB -->|Raw Results| NoiseFilter
     
-    NoiseFilter -->|Discard Irrelevant| FinalContext[✅ Context]
+    NoiseFilter -->|Discard Irrelevant| FinalContext["✅ Context"]
     
     %% LLM Processing
-    CoAgent -->|Prompt + Context| LLM[🧠 GPT-4o-mini]
+    CoAgent -->|Prompt + Context| LLM["🧠 GPT-4o-mini"]
     LLM -->|Response| Slack
     
     %% System Updates
-    JSONFiles -->|Hot-Reload| FileWatcher[👁️ File Watcher]
+    JSONFiles -->|Hot-Reload| FileWatcher["👁️ File Watcher"]
     FileWatcher -->|Update Cache| SOPCache
     JSONFiles -->|Sync| VectorDB
 
