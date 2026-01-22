@@ -53,7 +53,7 @@ graph LR
     end
     subgraph Intelligence [" 🧠 AI ENGINE "]
         CoAgent[<b>CoAgent AI</b><br>Context-Aware Assistant]
-        LLM[GPT-4o Model]
+        LLM[GPT-5-mini Model]
     end
     subgraph KnowledgeBase [" 📚 KNOWLEDGE ASSET "]
         Data[(<b>Unified Knowledge</b><br>SOPs + Vectors + Feedback)]
@@ -74,7 +74,6 @@ graph LR
     Admin -->|Review & Approve| Dashboard
     Dashboard -->|Update Standards| Data
     Data -.->|Instant Re-training| CoAgent
-    %% Styling for "C-Level" Look
     linkStyle default stroke:#666,stroke-width:2px,fill:none
     
     style Operations fill:#EDF6F9,stroke:#2B2D42,stroke-width:0px
@@ -98,7 +97,7 @@ graph LR
    - Keyword matches in SOP cache (instant)
    - Vector similarity in ChromaDB (semantic)
 3. **Context assembly** combines relevant SOPs, KB articles, fees, rules
-4. **GPT-4o-mini** generates colleague-facing guidance
+4. **GPT-5-mini** generates colleague-facing guidance
 5. **Response** delivered via Slack thread
 
 ---
