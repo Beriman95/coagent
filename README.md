@@ -41,46 +41,44 @@
 ## 🏗️ Architecture
 
 ```mermaid
-graph TB
-    %% Users & Entry Points
-    User["👤 Support Agent"] -->|Query| Slack["💬 Slack Interface"]
-    User -->|"!javítás"| Slack
+graph TD
+    %% Actors
+    User((👤 Agent))
+    Admin((👨‍💼 Admin))
     
-    Slack -->|REST / Socket| CoAgent["🤖 CoAgent MVP Bot"]
+    %% Components
+    subgraph "Core System"
+        Slack[💬 Slack]
+        Bot[🤖 MVP Bot\n(Python Script)]
+        AdminUI[🎨 Admin Panel\n(Flask App)]
+    end
     
-    %% Feedback Loop
-    CoAgent -->|Save Feedback| FeedbackStore[("📝 feedback.json")]
-    Admin["👨‍💼 Admin"] -->|Review & Approve| AdminUI["🎨 Admin Dashboard"]
-    AdminUI -->|Read Pending| FeedbackStore
-    AdminUI -->|Create SOP / KB| JSONFiles["📄 Data Store<br>(SOPs, KB, Fees)"]
+    %% Data Store (Shared Files)
+    subgraph "File Storage (The DB)"
+        JSONs[(📄 JSON Files\nSOPs, KB, Fees, Feedback)]
+        VectorDB[(🧠 ChromaDB\nVector Index)]
+    end
     
-    %% Core Logic & Search
-    CoAgent -->|Determine Intent| SearchLogic["🔍 Hybrid Search Engine"]
+    %% Flows
+    User <-->|Chat & !javítás| Slack
+    Slack <-->|Events| Bot
     
-    SearchLogic -->|1. Keyword Check| SOPCache[("📋 SOP Cache<br>In-Memory")]
-    SearchLogic -->|2. Semantic Search| VectorDB[("🧠 VectorDB<br>ChromaDB")]
+    Bot -->|Read & Watch| JSONs
+    Bot -->|Search| VectorDB
+    Bot -->|Write Feedback| JSONs
     
-    SOPCache -->|If Match Found| NoiseFilter{"⚡ Anti-Hallucination<br>Filter"}
-    VectorDB -->|Raw Results| NoiseFilter
+    Admin -->|Manage| AdminUI
+    AdminUI -->|Read Feedback| JSONs
+    AdminUI -->|Update/Approve SOPs| JSONs
+    AdminUI -->|Re-Index| VectorDB
     
-    NoiseFilter -->|Discard Irrelevant| FinalContext["✅ Context"]
-    
-    %% LLM Processing
-    CoAgent -->|Prompt + Context| LLM["🧠 GPT-4o-mini"]
-    LLM -->|Response| Slack
-    
-    %% System Updates
-    JSONFiles -->|Hot-Reload| FileWatcher["👁️ File Watcher"]
-    FileWatcher -->|Update Cache| SOPCache
-    JSONFiles -->|Sync| VectorDB
+    %% Logic Links
+    JSONs -.->|Hot-Reload| Bot
 
     %% Styling
-    style CoAgent fill:#c31e73,color:#fff
-    style LLM fill:#412991,color:#fff
+    style Bot fill:#c31e73,color:#fff
     style AdminUI fill:#471d6e,color:#fff
-    style VectorDB fill:#2d9cdb,color:#fff
-    style FeedbackStore fill:#ff9900,color:#fff
-    style NoiseFilter fill:#cc0000,color:#fff
+    style JSONs fill:#f9f9f9,stroke:#333,stroke-width:2px
 ```
 
 ### Data Flow
