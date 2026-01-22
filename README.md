@@ -41,43 +41,53 @@
 ## 🏗️ Architecture
 
 ```mermaid
-graph TD
-    %% Entities
-    User((👤 User / Agent))
-    Admin((👨‍💼 Admin))
-    
-    %% Main Components
-    subgraph "Execution Flow"
-        Slack[💬 Slack]
-        MVP[🤖 CoAgent MVP]
-        LLM[🧠 GPT-4o-mini]
+graph LR
+    %% Palette: 
+    %% Agent/Ops: #2B2D42 (Dark Blue)
+    %% AI/Tech: #6A0572 (Deep Purple)
+    %% Admin/Gov: #0077B6 (Rackhost Blue)
+    %% Knowledge: #264653 (Teal)
+    subgraph Operations [" 👥 OPERATIONS "]
+        Agent((Support Agent))
+        Slack[Slack Interface]
     end
-    
-    subgraph "Context & Management"
-        AdminUI[🎨 Admin UI]
-        Context[(🗂️ SOPs & VectorDB)]
+    subgraph Intelligence [" 🧠 AI ENGINE "]
+        CoAgent[<b>CoAgent AI</b><br>Context-Aware Assistant]
+        LLM[GPT-4o Model]
     end
+    subgraph KnowledgeBase [" 📚 KNOWLEDGE ASSET "]
+        Data[(<b>Unified Knowledge</b><br>SOPs + Vectors + Feedback)]
+    end
+    subgraph Governance [" 🛡️ GOVERNANCE "]
+        Admin((Admin))
+        Dashboard[Admin Dashboard]
+    end
+    %% Operational Flow
+    Agent -->|Query| Slack
+    Slack -->|Request| CoAgent
+    CoAgent <-->|Reasoning| LLM
+    CoAgent -->|Context Retrieval| Data
+    CoAgent -->|Answer| Slack
+    %% Improvement Loop (The "Flywheel")
+    Agent -.->|Feedback| CoAgent
+    CoAgent -.->|Log Issue| Data
+    Admin -->|Review & Approve| Dashboard
+    Dashboard -->|Update Standards| Data
+    Data -.->|Instant Re-training| CoAgent
+    %% Styling for "C-Level" Look
+    linkStyle default stroke:#666,stroke-width:2px,fill:none
     
-    %% The Flow
-    User -->|Ticket / Question| Slack
-    Slack -->|Pass Query| MVP
-    
-    MVP -->|1. Generate Embedding| MVP
-    MVP -->|2. Retrieve Context| Context
-    MVP -->|3. Send Prompt + Context| LLM
-    LLM -->|4. Answer| Slack
-    Slack -->|5. Reply| User
-    
-    %% Management Flow
-    Admin -->|Edit / Approve| AdminUI
-    AdminUI -->|Update Files| Context
-    Context -.->|🔥 HOT RELOAD| MVP
-    
-    %% Styling
-    style MVP fill:#c31e73,color:#fff
-    style AdminUI fill:#471d6e,color:#fff
-    style LLM fill:#412991,color:#fff
-    style Context fill:#2d9cdb,color:#fff
+    style Operations fill:#EDF6F9,stroke:#2B2D42,stroke-width:0px
+    style Agent fill:#2B2D42,stroke:#fff,color:#fff
+    style Slack fill:#fff,stroke:#2B2D42,stroke-width:2px
+    style Intelligence fill:#F2E2F5,stroke:#6A0572,stroke-width:0px
+    style CoAgent fill:#6A0572,stroke:#fff,color:#fff,stroke-width:2px
+    style LLM fill:#fff,stroke:#6A0572,stroke-width:1px,stroke-dasharray: 5 5
+    style KnowledgeBase fill:#E6F4F1,stroke:#264653,stroke-width:0px
+    style Data fill:#264653,stroke:#fff,color:#fff,stroke-width:2px
+    style Governance fill:#E0F4FF,stroke:#0077B6,stroke-width:0px
+    style Admin fill:#0077B6,stroke:#fff,color:#fff
+    style Dashboard fill:#fff,stroke:#0077B6,stroke-width:2px
 
 ```
 
