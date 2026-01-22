@@ -42,30 +42,44 @@
 
 ```mermaid
 graph TB
-    User[👤 Support Agent] -->|Query| Slack[💬 Slack Bot]
-    Slack -->|Process| CoAgent[🤖 CoAgent MVP]
+    %% Users & Entry Points
+    User[👤 Support Agent] -->|Query| Slack[💬 Slack Interface]
+    User -->|"!javítás"| Slack
     
-    CoAgent -->|Search| Search[🔍 Hybrid Search]
-    Search -->|1. Keyword Match| SOPs[(📋 SOP Cache)]
-    Search -->|2. Vector Search| ChromaDB[(🧠 ChromaDB)]
+    Slack -->|REST / Socket| CoAgent[🤖 CoAgent MVP Bot]
     
-    ChromaDB -->|KB Articles| KB[📚 Knowledge Base]
-    ChromaDB -->|Past Cases| Tickets[🎫 Tickets]
+    %% Feedback Loop
+    CoAgent -->|Save Feedback| FeedbackStore[(📝 feedback.json)]
+    Admin[👨‍💼 Admin] -->|Review & Approve| AdminUI[🎨 Admin Dashboard]
+    AdminUI -->|Read Pending| FeedbackStore
+    AdminUI -->|Create SOP / KB| JSONFiles[📄 Data Store\n(SOPs, KB, Fees)]
     
-    CoAgent -->|Context| LLM[🧠 GPT-4o-mini]
+    %% Core Logic & Search
+    CoAgent -->|Determine Intent| SearchLogic[🔍 Hybrid Search Engine]
+    
+    SearchLogic -->|1. Keyword Check| SOPCache[(📋 SOP Cache\nIn-Memory)]
+    SearchLogic -->|2. Semantic Search| VectorDB[(🧠 VectorDB\nChromaDB)]
+    
+    SOPCache -->|If Match Found| NoiseFilter{⚡ Anti-Hallucination\nFilter}
+    VectorDB -->|Raw Results| NoiseFilter
+    
+    NoiseFilter -->|Discard Irrelevant| FinalContext[✅ Context]
+    
+    %% LLM Processing
+    CoAgent -->|Prompt + Context| LLM[🧠 GPT-4o-mini]
     LLM -->|Response| Slack
-    Slack -->|Answer| User
     
-    Admin[👨‍💼 Admin] -->|Manage| AdminUI[🎨 Admin UI]
-    AdminUI -->|Update| Files[📄 JSON Files]
-    Files -->|Hot-Reload| Watcher[👁️ File Watcher]
-    Watcher -->|Reload| SOPs
-    Files -->|Sync| ChromaDB
-    
+    %% System Updates
+    JSONFiles -->|Hot-Reload| FileWatcher[👁️ File Watcher]
+    FileWatcher -->|Update Cache| SOPCache
+    JSONFiles -->|Sync| VectorDB
+    %% Styling
     style CoAgent fill:#c31e73,color:#fff
     style LLM fill:#412991,color:#fff
     style AdminUI fill:#471d6e,color:#fff
-    style ChromaDB fill:#2d9cdb,color:#fff
+    style VectorDB fill:#2d9cdb,color:#fff
+    style FeedbackStore fill:#ff9900,color:#fff
+    style NoiseFilter fill:#cc0000,color:#fff
 ```
 
 ### Data Flow
